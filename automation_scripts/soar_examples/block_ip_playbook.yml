@@ -1,0 +1,55 @@
+#
+# Description: A conceptual SOAR playbook in YAML format.
+# This playbook triggers on a brute-force alert, enriches the IP,
+# and blocks it on the firewall if it's deemed malicious.
+# This format is similar to what you might find in platforms like Tines or some custom SOARs.
+#
+
+name: "Automated Brute-Force IP Blocking"
+description: "Handles brute-force alerts by blocking the source IP address."
+trigger:
+  type: "SIEM_ALERT"
+  conditions:
+    - field: "alert_name"
+      value: "Multiple Failed Logins from Same IP"
+
+steps:
+  - name: "Extract_Source_IP"
+    action: "json_path_extractor"
+    parameters:
+      input: "{{ trigger.body.raw_log }}"
+      path: "$.source.ip"
+    output:
+      variable: "source_ip"
+
+  - name: "Check_IP_Reputation"
+    action: "abuseipdb_lookup"
+    parameters:
+      api_key: "{{ secrets.ABUSEIPDB_KEY }}"
+      ip_address: "{{ steps.Extract_Source_IP.source_ip }}"
+    output:
+      variable: "ip_reputation"
+
+  - name: "Decision_Is_Malicious"
+    type: "decision"
+    # Block if the abuse confidence score is over 90
+    condition: "{{ steps.Check_IP_Reputation.abuseConfidenceScore > 90 }}"
+    if_true:
+      - "Block_IP_on_Firewall"
+    if_false:
+      - "Create_Analyst_Ticket"
+
+  - name: "Block_IP_on_Firewall"
+    action: "palo_alto_block_ip"
+    parameters:
+      api_key: "{{ secrets.PANOS_API_KEY }}"
+      ip_address: "{{ steps.Extract_Source_IP.source_ip }}"
+      comment: "Automated block from SOAR playbook SOC-PB-003"
+
+  - name: "Create_Analyst_Ticket"
+    action: "jira_create_issue"
+    parameters:
+      project: "SOC"
+      summary: "Low-confidence brute-force alert requires review for IP: {{ steps.Extract_Source_IP.source_ip }}"
+      description: "IP reputation score was below threshold. Please investigate manually. Full alert: {{ trigger.body }}"
+      feat: Add conceptual SOAR playbook example.
