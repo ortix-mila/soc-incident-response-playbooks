@@ -1,0 +1,49 @@
+# Data Exfiltration Incident Response Playbook
+
+**ID:** SOC-PB-004
+**Tactic:** Exfiltration
+**MITRE ATT&CK Techniques:** [T1041 - Exfiltration Over C2 Channel](https://attack.mitre.org/techniques/T1041/), [T1567 - Exfiltration Over Web Service](https://attack.mitre.org/techniques/T1567/)
+
+## Overview
+This playbook addresses incidents involving the unauthorized transfer of data from inside the network to an external location. The primary goals are to immediately stop the data loss, determine the scope of the breach, and recover the affected systems.
+
+### Severity Levels
+* **Low:** A small amount of non-sensitive data was exfiltrated from a low-value asset.
+* **Medium:** Sensitive but non-regulated data (e.g., internal documents) was exfiltrated, or a large volume of non-sensitive data.
+* **High:** Personally Identifiable Information (PII), Protected Health Information (PHI), financial data, or intellectual property was exfiltrated. This is a critical breach.
+
+### Flowchart
+```mermaid
+graph TD
+    subgraph Detection
+        A["DLP/NDR Alert: Large Outbound Data Transfer"]
+    end
+
+    subgraph Investigation
+        A --> B{"Identify Source, Destination, & Data Type 👨"};
+        B --> C{"Analyze Network Logs for Volume & Protocol 👨"};
+        C --> D{"Review Endpoint for Malicious Processes 👨"};
+    end
+
+    subgraph Containment
+        D --> E["Block Destination IP/Domain at Firewall ⚡"];
+        E --> F["Isolate Source Endpoint via EDR ⚡"];
+    end
+
+    subgraph Eradication
+        F --> G["Kill Malicious Process & Associated Files ⚡"];
+        G --> H["Reset Compromised User Credentials ⚡"];
+    end
+
+    subgraph Recovery
+        H --> I{"Was Sensitive Data Lost? 👨"};
+        I -- "Yes" --> J["Activate Breach Notification Protocol 👨"];
+        I -- "No" --> K["Re-image Compromised Endpoint 👨"];
+        J --> K;
+        K --> L["Restore Endpoint to Network 👨"];
+    end
+
+    subgraph Post-Incident
+        L --> M["Document Findings & Impact Analysis 👨"];
+        M --> N["Tune DLP Rules to Prevent Recurrence 👨"];
+    end
