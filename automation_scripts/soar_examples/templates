@@ -1,0 +1,41 @@
+# [Playbook Title]
+
+**ID:** SOC-PB-XXX
+**Tactic:** [e.g., Initial Access, Execution, Persistence]
+**MITRE ATT&CK Techniques:** [e.g., TXXXX - Technique Name](link-to-mitre-attack)
+
+## Overview
+A brief, one-paragraph description of the incident this playbook addresses and its goal.
+
+### Severity Levels
+* **Low:** Criteria for a low-severity incident.
+* **Medium:** Criteria for a medium-severity incident.
+* **High:** Criteria for a high-severity incident.
+
+### Flowchart
+```mermaid
+graph TD
+    subgraph Detection
+        A["Triggering Event"]
+    end
+
+    subgraph Investigation
+        A --> B{"Analyst Action 👨"};
+        B --> C{"Automated Enrichment ⚡"};
+    end
+
+    subgraph Containment
+        C --> D["Containment Step ⚡"];
+    end
+
+    subgraph Eradication
+        D --> E["Eradication Step ⚡"];
+    end
+
+    subgraph Recovery
+        E --> F["Recovery Step 👨"];
+    end
+
+    subgraph Post-Incident
+        F --> G["Documentation & Closeout 👨"];
+    end
